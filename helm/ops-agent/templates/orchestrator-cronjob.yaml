@@ -1,0 +1,65 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ops-agent-orchestrator
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ops-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/component: orchestrator
+spec:
+  schedule: {{ .Values.orchestrator.schedule | quote }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            {{- include "ops-agent.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: orchestrator
+        spec:
+          serviceAccountName: ops-agent-orchestrator
+          restartPolicy: Never
+          containers:
+            - name: orchestrator
+              image: {{ .Values.image.registry }}/ops-agent-orchestrator:{{ .Values.image.tag }}
+              resources:
+                {{- toYaml .Values.orchestrator.resources | nindent 16 }}
+              env:
+                - name: NAMESPACE
+                  value: {{ .Values.namespace | quote }}
+                - name: SCOPE
+                  value: {{ .Values.scope | quote }}
+                - name: APP_NAME
+                  value: {{ .Values.appName | quote }}
+                - name: MATURITY_THRESHOLD
+                  value: {{ .Values.maturityThreshold | quote }}
+                - name: LLM_API_BASE
+                  value: {{ .Values.llm.apiBase | quote }}
+                - name: LLM_MODEL
+                  value: {{ .Values.llm.model | quote }}
+                {{- if .Values.llm.apiKeySecret }}
+                - name: LLM_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.llm.apiKeySecret }}
+                      key: api-key
+                {{- end }}
+                - name: MCP_OPENSHIFT_READONLY_URL
+                  value: "http://mcp-openshift-readonly:8000/mcp"
+                - name: MCP_OPENSHIFT_EXECUTOR_URL
+                  value: "http://mcp-openshift-executor:8000/mcp"
+                - name: MCP_ATLASSIAN_URL
+                  value: "http://mcp-atlassian:8000/mcp"
+                - name: MCP_RAG_URL
+                  value: "http://mcp-rag:8000/mcp"
+                - name: MCP_GOVERNANCE_URL
+                  value: "http://mcp-governance:8000/mcp"
+              volumeMounts:
+                - name: config
+                  mountPath: /app/config
+                  readOnly: true
+          volumes:
+            - name: config
+              configMap:
+                name: ops-agent-config

@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mcp-openshift-executor
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ops-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mcp-openshift-executor
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mcp-openshift-executor
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ops-agent.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "patch", "update"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mcp-openshift-executor
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ops-agent.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: mcp-openshift-executor
+subjects:
+  - kind: ServiceAccount
+    name: mcp-openshift-executor
+    namespace: {{ .Values.namespace }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-openshift-executor
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ops-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mcp-openshift-executor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: mcp-openshift-executor
+  template:
+    metadata:
+      labels:
+        {{- include "ops-agent.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: mcp-openshift-executor
+    spec:
+      serviceAccountName: mcp-openshift-executor
+      containers:
+        - name: mcp-server
+          image: {{ .Values.openshiftMcp.image }}
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          env:
+            - name: NAMESPACE
+              value: {{ .Values.namespace | quote }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-openshift-executor
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ops-agent.labels" . | nindent 4 }}
+spec:
+  selector:
+    app.kubernetes.io/component: mcp-openshift-executor
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP

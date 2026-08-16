@@ -1,0 +1,15 @@
+FROM registry.access.redhat.com/ubi9/python-312:latest
+
+WORKDIR /app
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+COPY pyproject.toml .
+RUN uv pip install --system --no-cache .
+
+COPY src/ src/
+COPY config/ config/
+
+ENV CONFIG_DIR=/app/config
+
+CMD ["python", "-m", "orchestrator.main"]

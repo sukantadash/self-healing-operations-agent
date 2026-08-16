@@ -1,0 +1,50 @@
+{{- if .Values.slack.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-slack
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ops-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mcp-slack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: mcp-slack
+  template:
+    metadata:
+      labels:
+        {{- include "ops-agent.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: mcp-slack
+    spec:
+      containers:
+        - name: mcp-server
+          image: {{ .Values.slack.image }}
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          env:
+            {{- if .Values.slack.botTokenSecret }}
+            - name: SLACK_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.slack.botTokenSecret }}
+                  key: bot-token
+            {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-slack
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ops-agent.labels" . | nindent 4 }}
+spec:
+  selector:
+    app.kubernetes.io/component: mcp-slack
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
+{{- end }}

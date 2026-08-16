@@ -1,0 +1,57 @@
+namespace: ops-agent
+scope: app-scoped
+appName: ""
+
+image:
+  registry: ""
+  tag: latest
+
+orchestrator:
+  schedule: "*/15 * * * *"
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+maturityThreshold: 80
+
+llm:
+  apiBase: ""
+  model: meta-llama/Llama-3.1-70B-Instruct
+  apiKeySecret: llm-api-key
+
+openshiftMcp:
+  image: quay.io/containers/kubernetes_mcp_server:latest
+  readonly:
+    enabled: true
+  executor:
+    enabled: true
+
+atlassian:
+  enabled: true
+  image: ghcr.io/sooperset/mcp-atlassian:latest
+  jiraUrl: ""
+  confluenceUrl: ""
+  credentialsSecret: atlassian-credentials
+
+slack:
+  enabled: false
+  image: mcp/slack:latest
+  botTokenSecret: slack-bot-token
+
+rag:
+  enabled: true
+  llamaStackUrl: http://llamastack:8321
+
+governance:
+  enabled: true
+  nemoGuardrailsUrl: ""
+
+llamastack:
+  enabled: false
+
+guardrails:
+  enabled: false

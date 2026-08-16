@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ops-agent-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ops-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/component: orchestrator
+data:
+  workflow.yaml: |
+    nodes:
+      - monitor
+      - diagnosis
+      - governance
+      - resolution_generator
+      - knowledge_curator
+      - ticket_agent
+      - executor
+      - feedback
+
+    entry_point: monitor
+
+    routing:
+      monitor:
+        type: conditional
+        key: monitor_route
+        routes:
+          no_errors: END
+          errors_found: diagnosis
+      diagnosis:
+        type: always
+        next: governance
+      governance:
+        type: conditional
+        key: governance_route
+        routes:
+          no_resolution: resolution_generator
+          immature: ticket_agent
+          mature: executor
+      resolution_generator:
+        type: always
+        next: knowledge_curator
+      knowledge_curator:
+        type: always
+        next: ticket_agent
+      ticket_agent:
+        type: always
+        next: END
+      executor:
+        type: always
+        next: feedback
+      feedback:
+        type: always
+        next: END
+
+  personas.yaml: |
+    monitor:
+      system_prompt: >
+        You are the Monitor Agent. You observe the health of OpenShift applications
+        by querying pod status, events, and logs. Report any anomalies or errors
+        found during your scan.
+
+    diagnosis:
+      system_prompt: >
+        You are the Diagnosis Agent. Given an error report from the Monitor, search
+        the KnowledgeBase for matching historical resolutions. Return the best match
+        if found, or indicate that no resolution exists.
+
+    governance:
+      system_prompt: >
+        You are the Governance Agent. Evaluate whether a resolution is mature enough
+        for autonomous self-healing. Check KB access policies, maturity scores, and
+        the self-heal gate. Route to the appropriate next step.
+
+    resolution_generator:
+      system_prompt: >
+        You are the Resolution Generator Agent. When no existing resolution is found
+        in the KnowledgeBase, use the LLM to generate a new resolution with root
+        cause analysis, fix steps, and verification criteria.
+
+    knowledge_curator:
+      system_prompt: >
+        You are the Knowledge Curator Agent. Index new resolutions into the
+        KnowledgeBase and create corresponding Confluence documentation pages.
+
+    ticket_agent:
+      system_prompt: >
+        You are the Ticket Agent. Create Jira tickets for resolutions that require
+        human review, including the resolution details, maturity score, and
+        recommended actions.
+
+    executor:
+      system_prompt: >
+        You are the Executor Agent. Apply approved self-healing actions to the
+        OpenShift cluster. Check each operation against the deny-list before
+        executing. Verify the fix by checking pod status afterward.
+
+    feedback:
+      system_prompt: >
+        You are the Feedback Agent. After the Executor applies a fix, update the
+        resolution's maturity score based on the outcome: +10 for success, -20 for
+        failure.

@@ -1,0 +1,44 @@
+nodes:
+  - monitor
+  - diagnosis
+  - governance
+  - resolution_generator
+  - knowledge_curator
+  - ticket_agent
+  - executor
+  - feedback
+
+entry_point: monitor
+
+routing:
+  monitor:
+    type: conditional
+    key: monitor_route
+    routes:
+      no_errors: END
+      errors_found: diagnosis
+  diagnosis:
+    type: always
+    next: governance
+  governance:
+    type: conditional
+    key: governance_route
+    routes:
+      no_resolution: resolution_generator
+      immature: ticket_agent
+      mature: executor
+  resolution_generator:
+    type: always
+    next: knowledge_curator
+  knowledge_curator:
+    type: always
+    next: ticket_agent
+  ticket_agent:
+    type: always
+    next: END
+  executor:
+    type: always
+    next: feedback
+  feedback:
+    type: always
+    next: END

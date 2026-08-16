@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ops-agent
+  labels:
+    app.kubernetes.io/part-of: ops-agent
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: image-pull-secret
+  namespace: ops-agent
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: e30=

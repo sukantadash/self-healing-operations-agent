@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mcp-openshift-readonly
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ops-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mcp-openshift-readonly
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mcp-openshift-readonly
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ops-agent.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "events", "pods/log"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mcp-openshift-readonly
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ops-agent.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: mcp-openshift-readonly
+subjects:
+  - kind: ServiceAccount
+    name: mcp-openshift-readonly
+    namespace: {{ .Values.namespace }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-openshift-readonly
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ops-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mcp-openshift-readonly
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: mcp-openshift-readonly
+  template:
+    metadata:
+      labels:
+        {{- include "ops-agent.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: mcp-openshift-readonly
+    spec:
+      serviceAccountName: mcp-openshift-readonly
+      containers:
+        - name: mcp-server
+          image: {{ .Values.openshiftMcp.image }}
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          env:
+            - name: NAMESPACE
+              value: {{ .Values.namespace | quote }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-openshift-readonly
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ops-agent.labels" . | nindent 4 }}
+spec:
+  selector:
+    app.kubernetes.io/component: mcp-openshift-readonly
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP

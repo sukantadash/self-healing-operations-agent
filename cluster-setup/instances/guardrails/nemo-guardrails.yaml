@@ -1,0 +1,6 @@
+apiVersion: trustyai.opendatahub.io/v1alpha1
+kind: NemoGuardrails
+metadata:
+  name: default
+  namespace: ops-agent
+spec: {}

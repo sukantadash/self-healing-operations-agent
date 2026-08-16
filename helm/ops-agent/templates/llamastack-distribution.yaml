@@ -1,0 +1,13 @@
+{{- if .Values.llamastack.enabled }}
+apiVersion: llama-stack.ai/v1alpha1
+kind: LlamaStackDistribution
+metadata:
+  name: default
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ops-agent.labels" . | nindent 4 }}
+spec:
+  distribution: remote-vllm
+  vectorStore:
+    provider: milvus
+{{- end }}

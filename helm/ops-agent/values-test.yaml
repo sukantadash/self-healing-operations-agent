@@ -1,0 +1,14 @@
+scope: app-scoped
+appName: test-app
+
+llm:
+  apiBase: http://localhost:11434/v1
+  model: llama3.1:8b
+  apiKeySecret: ""
+
+rag:
+  llamaStackUrl: http://localhost:8321
+
+atlassian:
+  jiraUrl: http://localhost:8080
+  confluenceUrl: http://localhost:8090

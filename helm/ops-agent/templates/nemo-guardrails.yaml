@@ -1,0 +1,10 @@
+{{- if .Values.guardrails.enabled }}
+apiVersion: trustyai.opendatahub.io/v1alpha1
+kind: NemoGuardrails
+metadata:
+  name: default
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ops-agent.labels" . | nindent 4 }}
+spec: {}
+{{- end }}
