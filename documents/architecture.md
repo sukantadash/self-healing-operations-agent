@@ -4,63 +4,11 @@ Self-Healing OpenShift Operations Agent — an AI-driven system that monitors Op
 
 ## System Components
 
-```mermaid
-graph TD
-    subgraph cluster ["OpenShift Cluster"]
-        subgraph cronjob ["CronJob (every 15 min)"]
-            ORCH["Orchestrator<br/>(LangGraph State Machine)"]
-        end
+![System architecture diagram](./system-architecture.svg)
 
-        subgraph mcps ["MCP Servers (HTTP, port 8000)"]
-            MON_MCP["Monitoring MCP<br/><i>read-only cluster access</i>"]
-            EXEC_MCP["Executor MCP(s)<br/><i>write access for remediation</i>"]
-            RAG_MCP["RAG MCP<br/><i>vector search over resolutions</i>"]
-            GOV_MCP["Governance MCP<br/><i>policy, maturity, audit</i>"]
-            TICKET_MCP["Ticketing MCP<br/><i>issue tracking</i>"]
-            KB_MCP["KnowledgeBase MCP<br/><i>runbook publishing</i>"]
-        end
-    end
+The orchestrator runs as an OpenShift CronJob every 15 minutes and coordinates eight LangGraph agents. It has no direct Kubernetes RBAC — all cluster, knowledge, governance, and ticketing interactions go through MCP servers over HTTP (FastMCP, port 8000). The Resolution Generator agent calls the LLM directly via `/v1/chat/completions`.
 
-    ORCH -- "MCP (HTTP)" --> MON_MCP
-    ORCH -- "MCP (HTTP)" --> EXEC_MCP
-    ORCH -- "MCP (HTTP)" --> RAG_MCP
-    ORCH -- "MCP (HTTP)" --> GOV_MCP
-    ORCH -- "MCP (HTTP)" --> TICKET_MCP
-    ORCH -- "MCP (HTTP)" --> KB_MCP
-    GOV_MCP -. "reads/writes maturity" .-> RAG_MCP
-
-    ORCH -- "/v1/chat/completions" --> LLM["LLM Inference Endpoint<br/>(Llama 3.1 70B via vLLM)"]
-
-    MON_MCP --> K8S_RO["K8s API<br/>(get, list, watch)"]
-    EXEC_MCP --> K8S_RW["K8s API<br/>(get, list, watch, patch, update)"]
-    RAG_MCP --> MILVUS["Llama Stack<br/>(Milvus Vector DB)"]
-    GOV_MCP --> NEMO["NeMo Guardrails<br/>(optional)"]
-
-    subgraph external ["External Systems (pluggable via MCP)"]
-        subgraph ticketing ["Ticketing"]
-            JIRA["<b>Jira</b> ← default"]
-            SNOW["ServiceNow"]
-            GH["GitHub Issues"]
-        end
-        subgraph knowledgebase ["KnowledgeBase"]
-            CONF["<b>Confluence</b> ← default"]
-            SP["SharePoint"]
-            WIKI["Custom wiki"]
-        end
-    end
-
-    TICKET_MCP --> ticketing
-    KB_MCP --> knowledgebase
-
-    subgraph executors ["Executor Targets (pluggable)"]
-        OCP["<b>OpenShift</b> ← default"]
-        AWS["AWS"]
-        AZURE["Azure"]
-        APP["Application-specific"]
-    end
-
-    EXEC_MCP --> executors
-```
+The Governance MCP reads and writes maturity scores as document metadata in the RAG MCP (Milvus via Llama Stack). Monitoring and Executor MCPs connect to separate read-only and write-enabled Kubernetes API endpoints. Ticketing and KnowledgeBase MCPs route to pluggable external systems (Jira and Confluence by default). Executor targets are also pluggable (OpenShift by default).
 
 ### Orchestrator
 
@@ -87,7 +35,7 @@ The orchestrator connects to MCP servers over HTTP (port 8000). Three of the fiv
 
 **Ticketing** — The Ticket Agent creates issues for human review when resolutions are new or not yet trusted. The framework connects to any ticketing system via its MCP server. Current implementation uses Jira via the Atlassian MCP; alternatives include ServiceNow, GitHub Issues, or PagerDuty with an MCP interface.
 
-**Executor** — The Executor agent applies fix steps through one or more execution MCP servers. The framework is not limited to a single executor — multiple MCP servers can be connected to remediate across different platforms. Current implementation uses the OpenShift Kubernetes MCP; additional executors could include AWS, Azure, database, or application-specific MCP servers.
+**Executor** — The Executor agent applies fix steps through one or more execution MCP servers. The framework is not limited to a single executor — multiple MCP servers can be connected to remediate across different platforms. Current implementation uses the OpenShift Kubernetes MCP; additional executors could include database or application-specific MCP servers.
 
 The governance server has a cross-server dependency: it calls the RAG MCP server via `fastmcp.Client` to read and write maturity scores stored as document metadata.
 
@@ -100,28 +48,15 @@ Two complementary deployment mechanisms:
 
 ## Agent Workflow
 
+![Agent workflow diagram](./agent-workflow.svg)
+
 Eight specialized agent roles process cluster state through a directed graph with two conditional routing points:
 
-```mermaid
-graph TD
-    MON["Monitor"] --> MON_DEC{" "}
-    MON_DEC -- "no_errors" --> END_CLEAN(["END<br/><i>no errors detected</i>"])
-    MON_DEC -- "errors_found" --> DIAG["Diagnosis"]
-    DIAG --> GOV["Governance"]
-    GOV --> GOV_DEC{" "}
-    GOV_DEC -- "no_resolution" --> RESGEN["Resolution Generator"]
-    GOV_DEC -- "immature" --> TICKET_B["Ticket Agent"]
-    GOV_DEC -- "mature" --> EXEC["Executor"]
-    RESGEN --> KC["Knowledge Curator"]
-    KC --> TICKET_A["Ticket Agent"]
-    TICKET_A --> END_A(["END<br/><i>ticket created</i>"])
-    TICKET_B --> END_B(["END<br/><i>ticket created</i>"])
-    EXEC --> FB["Feedback"]
-    FB --> END_C(["END<br/><i>maturity updated</i>"])
-
-    style MON_DEC fill:#f5f5f5,stroke:#999
-    style GOV_DEC fill:#f5f5f5,stroke:#999
-```
+1. **Monitor** — routes to `END` when no errors are found, otherwise continues to Diagnosis.
+2. **Governance** — routes based on resolution maturity:
+   - `no_resolution` → Path A
+   - `immature` (maturity &lt; 80) → Path B
+   - `mature` (maturity &gt;= 80) → Path C
 
 ### Agent Roles
 

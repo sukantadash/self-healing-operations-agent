@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 620" role="img" aria-labelledby="title desc">
+  <title id="title">GitHub Remediation Agent Workflow</title>
+  <desc id="desc">Three agent workflows with simple vertical layout.</desc>
+
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#455a64"/>
+    </marker>
+    <style>
+      .section { font: 600 13px system-ui, sans-serif; fill: #263238; }
+      .box { font: 600 12px system-ui, sans-serif; fill: #263238; }
+      .hint { font: 400 10px system-ui, sans-serif; fill: #78909c; }
+    </style>
+  </defs>
+
+  <rect width="1000" height="620" fill="#f8fafc"/>
+
+  <!-- Agent 1 -->
+  <text x="40" y="28" class="section" fill="#1565c0">Agent 1: Issue Creation</text>
+  <rect x="40" y="38" width="920" height="130" rx="10" fill="#fff" stroke="#1565c0" stroke-width="1.5"/>
+
+  <text x="60" y="62" class="hint" fill="#1565c0">from logs</text>
+  <rect x="60" y="72" width="100" height="34" rx="6" fill="#bbdefb" stroke="#1565c0"/>
+  <text x="110" y="94" text-anchor="middle" class="box">Log Analyzer</text>
+  <text x="175" y="94" class="hint">-&gt;</text>
+
+  <text x="60" y="122" class="hint" fill="#cc0000">from Lightwell</text>
+  <rect x="60" y="132" width="100" height="34" rx="6" fill="#ffcdd2" stroke="#cc0000"/>
+  <text x="110" y="154" text-anchor="middle" class="box">Vuln Analyzer</text>
+  <text x="175" y="154" class="hint">-&gt;</text>
+
+  <rect x="200" y="95" width="110" height="44" rx="6" fill="#bbdefb" stroke="#1565c0"/>
+  <text x="255" y="122" text-anchor="middle" class="box">Issue Creator</text>
+  <text x="340" y="122" class="hint">-&gt;</text>
+  <rect x="360" y="102" width="90" height="30" rx="6" fill="#e3f2fd" stroke="#1565c0"/>
+  <text x="405" y="121" text-anchor="middle" class="hint">GitHub Issue</text>
+
+  <line x1="500" y1="168" x2="500" y2="195" stroke="#455a64" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Agent 2 -->
+  <text x="40" y="208" class="section" fill="#ef6c00">Agent 2: Issue Resolution</text>
+  <rect x="40" y="218" width="920" height="100" rx="10" fill="#fff" stroke="#ef6c00" stroke-width="1.5"/>
+
+  <rect x="60" y="250" width="90" height="34" rx="6" fill="#ffe0b2" stroke="#ef6c00"/>
+  <text x="105" y="272" text-anchor="middle" class="box">Analyzer</text>
+  <text x="165" y="272" class="hint">-&gt;</text>
+  <rect x="180" y="250" width="90" height="34" rx="6" fill="#ffe0b2" stroke="#ef6c00"/>
+  <text x="225" y="272" text-anchor="middle" class="box">Resolution</text>
+  <text x="285" y="272" class="hint">-&gt;</text>
+  <rect x="300" y="250" width="110" height="34" rx="6" fill="#ffe0b2" stroke="#ef6c00"/>
+  <text x="355" y="272" text-anchor="middle" class="box">Unit Tests</text>
+  <text x="405" y="272" class="hint">-&gt;</text>
+  <rect x="420" y="250" width="90" height="34" rx="6" fill="#ffe0b2" stroke="#ef6c00"/>
+  <text x="465" y="272" text-anchor="middle" class="box">Commit/PR</text>
+  <text x="525" y="272" class="hint">-&gt;</text>
+  <rect x="540" y="250" width="100" height="34" rx="6" fill="#ffe0b2" stroke="#ef6c00"/>
+  <text x="590" y="272" text-anchor="middle" class="box">Update Status</text>
+
+  <text x="680" y="272" class="hint">retry on test fail (max 3)</text>
+
+  <line x1="500" y1="318" x2="500" y2="345" stroke="#455a64" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Agent 3 -->
+  <text x="40" y="358" class="section" fill="#6a1b9a">Agent 3: PR Review</text>
+  <rect x="40" y="368" width="920" height="220" rx="10" fill="#fff" stroke="#7b1fa2" stroke-width="1.5"/>
+
+  <rect x="60" y="395" width="100" height="34" rx="6" fill="#e1bee7" stroke="#7b1fa2"/>
+  <text x="110" y="417" text-anchor="middle" class="box">PR Reviewer</text>
+  <rect x="60" y="445" width="120" height="34" rx="6" fill="#e1bee7" stroke="#7b1fa2"/>
+  <text x="120" y="467" text-anchor="middle" class="box">Unit Test Review</text>
+
+  <text x="180" y="430" class="hint">-&gt;</text>
+  <rect x="200" y="410" width="100" height="54" rx="6" fill="#e1bee7" stroke="#7b1fa2"/>
+  <text x="250" y="435" text-anchor="middle" class="box">Decision</text>
+  <text x="250" y="452" text-anchor="middle" class="hint">Agent</text>
+  <text x="320" y="435" class="hint">-&gt;</text>
+
+  <rect x="340" y="395" width="100" height="30" rx="6" fill="#c8e6c9" stroke="#2e7d32"/>
+  <text x="390" y="414" text-anchor="middle" class="hint">Approve</text>
+  <rect x="340" y="435" width="100" height="30" rx="6" fill="#ffcdd2" stroke="#c62828"/>
+  <text x="390" y="454" text-anchor="middle" class="hint">Reject</text>
+  <rect x="340" y="475" width="100" height="30" rx="6" fill="#fff9c4" stroke="#f9a825"/>
+  <text x="390" y="494" text-anchor="middle" class="hint">Manual</text>
+
+  <text x="60" y="540" class="hint">Path A: approve  |  Path B: reject  |  Path C: manual review</text>
+
+  <text x="500" y="610" text-anchor="middle" class="hint">Each agent runs independently on OpenShift (RHOAI 3.5); MCP and LLM via AI Gateway</text>
+</svg>
+

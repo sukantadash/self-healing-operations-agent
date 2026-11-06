@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 750" role="img" aria-labelledby="title desc">
+  <title id="title">Self-Healing-secure-app architecture</title>
+  <desc id="desc">Three independent agents on OpenShift AI 3.5 with AI Gateway, MCP servers, and LLM models. Unit testing in Agent 2 and Agent 3.</desc>
+
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#455a64"/>
+    </marker>
+    <style>
+      .diagram-title { font: 700 16px system-ui, sans-serif; fill: #263238; }
+      .title { font: 600 13px system-ui, sans-serif; fill: #263238; }
+      .box { font: 600 12px system-ui, sans-serif; fill: #263238; }
+      .sub { font: 400 11px system-ui, sans-serif; fill: #546e7a; }
+      .hint { font: 400 10px system-ui, sans-serif; fill: #78909c; }
+    </style>
+  </defs>
+
+  <rect width="1000" height="750" fill="#f8fafc"/>
+  <text x="500" y="32" text-anchor="middle" class="diagram-title">Self-Healing-secure-app architecture</text>
+
+  <!-- Platform boundary -->
+  <rect x="20" y="48" width="960" height="682" rx="12" fill="#e8f4fc" stroke="#1565c0" stroke-width="2"/>
+  <text x="40" y="72" class="title" fill="#1565c0">OpenShift — Red Hat OpenShift AI 3.5</text>
+  <text x="40" y="90" class="hint">Three independent agent deployments (separate workloads, no shared process)</text>
+
+  <!-- Three independent agents -->
+  <rect x="40" y="108" width="290" height="118" rx="10" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="60" y="130" class="title" fill="#1565c0">Agent 1</text>
+  <text x="60" y="146" class="hint">Issue Creation</text>
+  <text x="60" y="173" class="sub">Log Analyzer</text>
+  <text x="60" y="190" class="sub">Vuln Analyzer</text>
+  <text x="60" y="207" class="sub">Issue Creator</text>
+
+  <rect x="355" y="108" width="290" height="118" rx="10" fill="#fff3e0" stroke="#ef6c00" stroke-width="1.5"/>
+  <text x="375" y="130" class="title" fill="#e65100">Agent 2</text>
+  <text x="375" y="146" class="hint">Issue Resolution</text>
+  <text x="375" y="173" class="sub">Analyze and fix</text>
+  <text x="375" y="190" class="sub">Unit test verification</text>
+  <text x="375" y="207" class="sub">Commit, open PR, update issue</text>
+
+  <rect x="670" y="108" width="290" height="118" rx="10" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1.5"/>
+  <text x="690" y="130" class="title" fill="#6a1b9a">Agent 3</text>
+  <text x="690" y="146" class="hint">PR Review</text>
+  <text x="690" y="173" class="sub">PR review</text>
+  <text x="690" y="190" class="sub">Unit test review</text>
+  <text x="690" y="207" class="sub">Approve / reject / manual</text>
+
+  <!-- Coordination note -->
+  <rect x="40" y="241" width="920" height="44" rx="8" fill="#f5f5f5" stroke="#24292f" stroke-width="1.2"/>
+  <text x="60" y="268" class="sub">Agents coordinate only via GitHub (issues, labels, PRs) — not direct calls</text>
+
+  <!-- Arrows to gateway -->
+  <line x1="185" y1="226" x2="185" y2="316" stroke="#455a64" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="500" y1="226" x2="500" y2="316" stroke="#455a64" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="815" y1="226" x2="815" y2="316" stroke="#455a64" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- AI Gateway -->
+  <rect x="120" y="321" width="760" height="70" rx="10" fill="#fff3e0" stroke="#ef6c00" stroke-width="2"/>
+  <text x="500" y="351" text-anchor="middle" class="title" fill="#e65100">AI Gateway</text>
+  <text x="500" y="371" text-anchor="middle" class="hint">Single entry point for all MCP and LLM traffic</text>
+
+  <line x1="500" y1="391" x2="500" y2="421" stroke="#455a64" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- MCP Servers -->
+  <rect x="40" y="426" width="920" height="100" rx="10" fill="#fff8e1" stroke="#ef6c00" stroke-width="1.5"/>
+  <text x="60" y="448" class="title" fill="#e65100">MCP Servers (behind AI Gateway)</text>
+  <rect x="80" y="466" width="150" height="44" rx="6" fill="#fff" stroke="#ef6c00"/>
+  <text x="155" y="493" text-anchor="middle" class="box">GitHub</text>
+  <rect x="250" y="466" width="150" height="44" rx="6" fill="#fff" stroke="#ef6c00"/>
+  <text x="325" y="493" text-anchor="middle" class="box">Governance</text>
+  <rect x="420" y="466" width="150" height="44" rx="6" fill="#fff" stroke="#ef6c00"/>
+  <text x="495" y="493" text-anchor="middle" class="box">RAG</text>
+  <rect x="590" y="466" width="150" height="44" rx="6" fill="#fff" stroke="#cc0000"/>
+  <text x="665" y="493" text-anchor="middle" class="box">Lightwell</text>
+  <rect x="760" y="466" width="180" height="44" rx="6" fill="#c8e6c9" stroke="#2e7d32"/>
+  <text x="850" y="486" text-anchor="middle" class="box">LLM Models</text>
+  <text x="850" y="501" text-anchor="middle" class="hint">vLLM / Llama Stack</text>
+
+  <!-- External systems -->
+  <rect x="40" y="556" width="440" height="100" rx="10" fill="#eceff1" stroke="#78909c" stroke-width="1.5"/>
+  <text x="60" y="578" class="title" fill="#455a64">Inputs</text>
+  <rect x="60" y="596" width="180" height="44" rx="6" fill="#fff" stroke="#546e7a"/>
+  <text x="150" y="623" text-anchor="middle" class="sub">Log files / CI</text>
+  <rect x="260" y="596" width="200" height="44" rx="6" fill="#fff" stroke="#cc0000"/>
+  <text x="360" y="623" text-anchor="middle" class="sub">Lightwell CVE / SBOM</text>
+
+  <rect x="520" y="556" width="440" height="100" rx="10" fill="#f5f5f5" stroke="#24292f" stroke-width="1.5"/>
+  <text x="540" y="578" class="title" fill="#24292f">GitHub (external)</text>
+  <text x="540" y="606" class="sub">Issues, labels, branches, PRs, reviews</text>
+  <text x="540" y="626" class="hint">Reached via GitHub MCP through AI Gateway</text>
+
+  <text x="500" y="696" text-anchor="middle" class="hint">Unit testing built into Agent 2 (verify fix) and Agent 3 (review tests)</text>
+  <text x="500" y="714" text-anchor="middle" class="hint">Each agent: LangGraph orchestrator + webhook/CronJob on OpenShift</text>
+</svg>
