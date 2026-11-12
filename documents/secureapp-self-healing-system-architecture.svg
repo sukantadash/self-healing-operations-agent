@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 750" role="img" aria-labelledby="title desc">
-  <title id="title">Self-Healing-secure-app architecture</title>
+  <title id="title">SecureApp Self-Healing Agent architecture</title>
   <desc id="desc">Three independent agents on OpenShift AI 3.5 with AI Gateway, MCP servers, and LLM models. Unit testing in Agent 2 and Agent 3.</desc>
 
   <defs>
@@ -17,7 +17,7 @@
   </defs>
 
   <rect width="1000" height="750" fill="#f8fafc"/>
-  <text x="500" y="32" text-anchor="middle" class="diagram-title">Self-Healing-secure-app architecture</text>
+  <text x="500" y="32" text-anchor="middle" class="diagram-title">SecureApp Self-Healing Agent</text>
 
   <!-- Platform boundary -->
   <rect x="20" y="48" width="960" height="682" rx="12" fill="#e8f4fc" stroke="#1565c0" stroke-width="2"/>

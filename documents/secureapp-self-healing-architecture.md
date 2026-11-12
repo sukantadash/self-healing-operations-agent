@@ -1,6 +1,6 @@
-# GitHub Log Remediation Architecture
+# SecureApp Self-Healing Agent Architecture
 
-An AI-driven pipeline with **three independent agents** — Issue Creation, Issue Resolution, and PR Review — that detect problems from **application logs** and **IBM Red Hat Lightwell security vulnerabilities**, file GitHub issues, generate fixes with unit test verification, open pull requests, and route each PR through a separate review process.
+**SecureApp Self-Healing Agent** is an AI-driven pipeline with **three independent agents** — Issue Creation, Issue Resolution, and PR Review — that detect problems from **application logs** and **IBM Red Hat Lightwell security vulnerabilities**, file GitHub issues, generate fixes with unit test verification, open pull requests, and route each PR through a separate review process.
 
 This architecture extends the same LangGraph + FastMCP patterns used by the OpenShift operations agent, but targets **source-code remediation via GitHub** instead of cluster remediation via OpenShift MCP.
 
@@ -8,7 +8,7 @@ All three agents run as **independent workloads on OpenShift** under **Red Hat O
 
 ## System Components
 
-![System architecture diagram](./github-remediation-system-architecture.svg)
+![System architecture diagram](./secureapp-self-healing-system-architecture.svg)
 
 The system is split into **three separate LangGraph orchestrators**, each deployed as its own OpenShift Deployment (webhook handler) or CronJob. Each agent owns a distinct phase of the lifecycle and communicates through GitHub state rather than shared in-process state.
 
@@ -16,7 +16,7 @@ The system is split into **three separate LangGraph orchestrators**, each deploy
 
 | Layer | Technology |
 |-------|-----------|
-| **Runtime** | OpenShift (dedicated namespace per agent or shared `github-remediation` namespace) |
+| **Runtime** | OpenShift (dedicated namespace per agent or shared `secureapp-self-healing` namespace) |
 | **AI platform** | Red Hat OpenShift AI 3.5 (RHOAI) |
 | **Agent framework** | LangGraph (three independent state machines) |
 | **Ingress for AI** | **AI Gateway** — all MCP server and LLM model traffic routes through a single gateway |
@@ -122,7 +122,7 @@ Default model: Llama 3.1 70B Instruct via OpenAI-compatible `/v1/chat/completion
 
 ## Agent Workflow
 
-![Agent workflow diagram](./github-remediation-agent-workflow.svg)
+![Agent workflow diagram](./secureapp-self-healing-agent-workflow.svg)
 
 ### Agent 1: Issue Creation
 
@@ -330,7 +330,7 @@ Cross-agent correlation uses GitHub issue/PR metadata: `error_signature` in issu
 | PR opened by bot | PR Review | GitHub `pull_request` webhook |
 | PR updated (new commits) | PR Review | GitHub `pull_request.synchronize` webhook |
 
-Deployment on OpenShift uses a Helm values overlay (`values-github-remediation.yaml`) that provisions:
+Deployment on OpenShift uses a Helm values overlay (`values-secureapp-self-healing.yaml`) that provisions:
 
 - **Three independent orchestrator workloads** — one Deployment per agent (webhook receivers) plus optional CronJobs for scheduled scans
 - **MCP server Deployments** — GitHub, Governance, RAG, Lightwell
@@ -358,7 +358,7 @@ Each agent scales, restarts, and deploys independently. A failure or upgrade in 
 
 ## Relationship to OpenShift Operations Agent
 
-| Aspect | OpenShift Agent | GitHub Remediation |
+| Aspect | OpenShift Agent | SecureApp Self-Healing Agent |
 |--------|----------------|-------------------|
 | **Agents** | 8 roles, 1 orchestrator | 3 orchestrators, 10 steps total |
 | **Trigger** | Unhealthy pods (every 15 min) | Logs, Lightwell CVEs, issues, PRs (event-driven) |

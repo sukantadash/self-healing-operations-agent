@@ -70,6 +70,6 @@ Makefile                # Build, test, deploy targets
 ## Design Documents
 
 - [documents/architecture.md](documents/architecture.md) — OpenShift operations agent architecture
-- [documents/github-remediation-architecture.md](documents/github-remediation-architecture.md) — GitHub log remediation and PR review architecture
+- [documents/secureapp-self-healing-architecture.md](documents/secureapp-self-healing-architecture.md) — SecureApp Self-Healing Agent architecture
 - [DESIGN.md](DESIGN.md) — Conceptual architecture (agent roles, workflow graph, data model)
 - [IMPLEMENTATION.md](IMPLEMENTATION.md) — Component inventory, deployment blueprint, resolved decisions
