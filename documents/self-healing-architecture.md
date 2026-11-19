@@ -6,6 +6,22 @@ This architecture extends the same LangGraph + FastMCP patterns used by the Open
 
 All three agents run as **independent workloads on OpenShift** under **Red Hat OpenShift AI (RHOAI) 3.5**. They do not share a process, database, or orchestrator instance. Coordination happens exclusively through GitHub (issues, labels, PRs, webhooks).
 
+## Quick Start
+
+The Red Hat AI quick start [agentic-software-factory](https://github.com/rh-ai-quickstart/agentic-software-factory.git) can be enhanced for this use case. It already deploys an agentic software factory on OpenShift AI: agents file GitHub issues, open pull requests, review changes, repair pipelines, and triage application logs through a central AI gateway.
+
+Extend those agents into the Application Self-Healing Agent:
+
+| Quick start | Enhancement for this use case |
+|-------------|-------------------------------|
+| **Rummager** | Issue Creation: detect runtime errors in application logs and CI failures, deduplicate by error signature, and open a `needs-fix` issue |
+| **Developer** | Issue Resolution: generate a source fix, run the full pytest suite, retry on failure, and open a pull request linked to the issue |
+| **Review** | PR Review: score the diff and unit tests, then approve, reject, or request manual review through the Governance MCP |
+| **Fixer** | Feed GitHub Actions CI failures into Issue Creation so a failed pipeline becomes a `needs-fix` issue |
+| **AI gateway** | Remain the single route for GitHub MCP, Governance MCP, optional RAG MCP, and LLM inference |
+
+Eligible applications stay GitOps-delivered, built by CI/CD, and fully covered by unit tests. A merged pull request is what the GitOps controller reconciles onto the cluster.
+
 ## Eligibility Criteria
 
 An application enters this pipeline when it is delivered the GitOps way through CI/CD, fully covered by unit tests, and its repository and logs let the three agents detect a runtime error, propose a source fix, and verify that fix before opening a pull request. Every requirement below must be met.
